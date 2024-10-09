@@ -1,0 +1,66 @@
+stages:
+  - build
+  - test
+  - deploy
+  - backup
+  - restore
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
+services:
+  - docker:dind
+
+build_backend:
+  stage: build
+  image: docker:latest
+  script:
+    - docker build --build-arg BACKEND_PORT=${BACKEND_PORT} -t backend:$CI_COMMIT_SHA ./backend
+
+build_frontend:
+  stage: build
+  image: docker:latest
+  script:
+    - docker build --build-arg FRONTEND_PORT=${FRONTEND_PORT} -t frontend:$CI_COMMIT_SHA ./frontend
+
+test_backend:
+  stage: test
+  image: node:14
+  script:
+    - cd backend
+    - npm install
+    - npm test
+
+test_frontend:
+  stage: test
+  image: node:14
+  script:
+    - cd frontend
+    - npm install
+    - npm test
+
+deploy:
+  stage: deploy
+  image: docker/compose:latest
+  script:
+    - docker-compose --env-file .env up -d
+  only:
+    - main
+
+backup_db:
+  stage: backup
+  image: docker/compose:latest
+  script:
+    - docker-compose --env-file .env run --rm db-management ./backup-db.sh
+  artifacts:
+    paths:
+      - backend/backup_*.sql
+  when: manual
+
+restore_db:
+  stage: restore
+  image: docker/compose:latest
+  script:
+    - docker-compose --env-file .env run --rm db-management ./restore-db.sh ${BACKUP_FILE}
+  when: manual

@@ -1,0 +1,133 @@
+openapi: 3.0.0
+info:
+  title: StoryBuilder API
+  version: 1.0.0
+
+paths:
+  /api/dictionary:
+    get:
+      summary: Get all dictionary words
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DictionaryWord'
+    
+    post:
+      summary: Add a new word to the dictionary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DictionaryWord'
+      responses:
+        '201':
+          description: Created
+
+  /api/story:
+    get:
+      summary: Get all stories
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Story'
+    
+    post:
+      summary: Create a new story
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Story'
+      responses:
+        '201':
+          description: Created
+
+  /api/sentence:
+    post:
+      summary: Add a new sentence to a story
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Sentence'
+      responses:
+        '201':
+          description: Created
+
+  /api/word/{id}/declinations:
+    get:
+      summary: Get declinations for a word
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WordDeclination'
+
+components:
+  schemas:
+    DictionaryWord:
+      type: object
+      properties:
+        id:
+          type: integer
+        word:
+          type: string
+        parameters:
+          type: object
+    
+    Story:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+    
+    Sentence:
+      type: object
+      properties:
+        id:
+          type: integer
+        story_id:
+          type: integer
+        content:
+          type: string
+    
+    WordDeclination:
+      type: object
+      properties:
+        id:
+          type: integer
+        word_id:
+          type: integer
+        declination:
+          type: string
+        tense:
+          type: string
+        person:
+          type: string
